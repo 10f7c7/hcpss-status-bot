@@ -1,0 +1,20 @@
+{
+  "name": "hcpss-status-bot",
+  "version": "1.0.0",
+  "description": "Discord bot that detects and notifies about any changes in the HCPSS status",
+  "homepage": "https://github.com/10f7c7/hcpss-status-bot#readme",
+  "bugs": {
+    "url": "https://github.com/10f7c7/hcpss-status-bot/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/10f7c7/hcpss-status-bot.git"
+  },
+  "license": "ISC",
+  "author": "10f7c7",
+  "type": "commonjs",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
