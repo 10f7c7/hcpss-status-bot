@@ -60,16 +60,20 @@ export async function getHcpssStatus() {
   for (let j = 0; j < body.length; j++) {
     if (body[j].tagName == "h2") continue;
     if (body[j].tagName == "p") {
+      // @ts-ignore
       block += body[j].children[0].data + "\n\n";
       continue;
     }
     if (body[j].tagName == "h3") {
+      // @ts-ignore
       block += `**${body[j].children[0].data}** \n`;
       continue;
     }
     if (body[j].tagName == "ul") {
       for (let k = 0; k < body[j].children.length; k++) {
+        // @ts-ignore
         if (body[j].children[k].tagName == "li") {
+          // @ts-ignore
           block += `- ${body[j].children[k].children[0].data} \n`
         }
       }
