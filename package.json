@@ -13,8 +13,29 @@
   "license": "ISC",
   "author": "10f7c7",
   "type": "commonjs",
-  "main": "index.ts",
+  "main": "src/server.ts",
   "scripts": {
+    "start": "node dist/server.js",
+    "clean": "rm -rf dist",
+    "build:ts": "tsc",
+    "dev": "tsx watch --env-file=.env src/server.ts",
+    "register": "node dist/commands.js",
+    "lint": "eslint . --ext .ts",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "@types/node": "^22.10.7",
+    "eslint": "^9.18.0",
+    "globals": "^15.14.0",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.21.0"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "discord-interactions": "^4.1.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "tsx": "^4.19.2"
   }
 }
