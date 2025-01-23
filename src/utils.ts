@@ -112,9 +112,42 @@ export async function getHcpssStatus() {
   return dataReturn;
 }
 
+export async function checkStatus() {
+  if (!channels.length) return;
+
+  const data: data_storage = await getHcpssStatus();
+
+  if (prevData.date == data.date && prevData.status == data.status) return;
+  if (prevData.date != data.date && data.status.includes("Normal")) return;
+
+
+  console.log("channels", channels)
+  for (let i = 0; i < channels.length; i++) {
+    console.log("channel", channels[i])
+    DiscordRequest(`/channels/${channels[i]}/messages`, {
+      method: 'POST',
+      body: {
+        tts: false,
+        embeds: [{
+          title: data.status,
+          description: data.block.replace("Staff\n", "**Staff**"),
+          color: data.color,
+          author: { name: data.date }
+        }]
+      }
+    })
+
+  }
+
+  prevData.date = data.date;
+  prevData.status = data.status;
+
+
+}
+
+
+
+
+
 export const channels: Array<string> = [];
-
-
-
-
 export const prevData: data_storage = { date: '', status: '' }; 
