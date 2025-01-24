@@ -3,7 +3,7 @@ import {
   InteractionType,
   InteractionResponseType,
 } from 'discord-interactions';
-import { getHcpssStatus, channels, type data_storage } from './utils';
+import { getHcpssStatus, type data_storage } from './utils';
 import db from "./models/index"
 
 async function postInteractions(req: Request, res: Response): Promise<void> {
@@ -26,6 +26,8 @@ async function postInteractions(req: Request, res: Response): Promise<void> {
     const { name } = data;
 
     if (name === 'getstatus') {
+      const channels = await db.Channel.findAll()
+      console.log(channels[0].channelId);
       // Send a message into the channel where command was triggered from
       const data: data_storage = await getHcpssStatus()
       res.send({
@@ -39,8 +41,27 @@ async function postInteractions(req: Request, res: Response): Promise<void> {
 
     if (name === "register_channel") {
       console.log(req.body);
-      db.Channel.create({ channelId: req.body.channel.id, guildId: req.body.guild.id })
-      channels.push(req.body.channel.id)
+
+      const [channel, created] = await db.Channel.findOrCreate({
+        where: {
+          channelId: req.body.channel.id
+        },
+        defaults: {
+          guildId: req.body.guild?.id
+        }
+      })
+      // channels.push(req.body.channel.id)
+
+      if (!created) {
+        res.send({
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          data: {
+            content: "Channel Already Registered."
+          }
+        });
+        return;
+      }
+
       res.send({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {

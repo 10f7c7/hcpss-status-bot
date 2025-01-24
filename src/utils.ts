@@ -1,5 +1,6 @@
 import * as cheerio from 'cheerio';
 import 'dotenv/config';
+import db from "./models/index"
 
 export interface data_storage {
   date: string;
@@ -49,6 +50,7 @@ export async function InstallGlobalCommands(appId, commands) {
 // Simple method that returns a random emoji from list
 export async function getHcpssStatus() {
   const html = await fetch("https://status.hcpss.org")
+  // const html = await fetch("https://discord.10f7c7.dev/test")
 
   const $ = cheerio.load(await html.text());
   const section = $("#status-block div").html();
@@ -113,21 +115,24 @@ export async function getHcpssStatus() {
 }
 
 export async function checkStatus() {
-  if (!channels.length) return;
 
   const data: data_storage = await getHcpssStatus();
 
   if (prevData.date == data.date && prevData.status == data.status) return;
   if (prevData.date != data.date && data.status.includes("Normal")) return;
+  const channels = await db.Channel.findAll()
+
+
+  if (!channels.length) return;
 
 
   console.log("channels", channels)
   for (let i = 0; i < channels.length; i++) {
-    console.log("channel", channels[i])
-    DiscordRequest(`/channels/${channels[i]}/messages`, {
+    console.log("channel", channels[i].channelId)
+    DiscordRequest(`/channels/${channels[i].channelId}/messages`, {
       method: 'POST',
       body: {
-        tts: false,
+        tts: true,
         embeds: [{
           title: data.status,
           description: data.block.replace("Staff\n", "**Staff**"),
@@ -149,5 +154,5 @@ export async function checkStatus() {
 
 
 
-export const channels: Array<string> = [];
+// export const channels: Array<string> = [];
 export const prevData: data_storage = { date: '', status: '' }; 

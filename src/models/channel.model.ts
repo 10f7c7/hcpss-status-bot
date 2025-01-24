@@ -27,7 +27,7 @@ export class Channel extends Model<
       },
       guildId: {
         type: DataTypes.BIGINT,
-        allowNull: false
+        allowNull: true
       },
       createdAt: {
         type: DataTypes.DATE
