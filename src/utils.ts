@@ -1,6 +1,8 @@
 import * as cheerio from 'cheerio';
 import 'dotenv/config';
 import db from "./models/index"
+import { type RESTPostAPIApplicationCommandsJSONBody } from 'discord-api-types/v10'
+
 
 export interface data_storage {
   date: string;
@@ -9,21 +11,33 @@ export interface data_storage {
   color?: number;
 }
 
+enum DiscordRequestMethod {
+  PUT = "PUT",
+  PATCH = "PATCH",
+  POST = "POST",
+  GET = "GET",
+  DELETE = "DELETE"
+}
 
+interface DiscordRequestOptions {
+  method: DiscordRequestMethod,
+  body: string | Array<RESTPostAPIApplicationCommandsJSONBody> | object
+};
 
-export async function DiscordRequest(endpoint, options) {
+export async function DiscordRequest(endpoint: string, options: DiscordRequestOptions): Promise<Response> {
   // append endpoint to root API URL
-  const url = 'https://discord.com/api/v10/' + endpoint;
+  const url: string = 'https://discord.com/api/v10/' + endpoint;
   // Stringify payloads
-  if (options.body) options.body = JSON.stringify(options.body);
+  // if (options.body) options.body = JSON.stringify(options.body);
   // Use fetch to make requests
-  const res = await fetch(url, {
+  const res: Response = await fetch(url, {
     headers: {
       Authorization: `Bot ${process.env.DISCORD_TOKEN}`,
       'Content-Type': 'application/json; charset=UTF-8',
       'User-Agent': 'HCPSSStatusBot(https://github.com/10f7c7/hcpss-status-bot, 1.0.0)',
     },
-    ...options
+    method: options.method,
+    body: JSON.stringify(options.body)
   });
   // throw API errors
   if (!res.ok) {
@@ -35,28 +49,29 @@ export async function DiscordRequest(endpoint, options) {
   return res;
 }
 
-export async function InstallGlobalCommands(appId, commands) {
+export async function InstallGlobalCommands(appId: string | number, commands: Array<RESTPostAPIApplicationCommandsJSONBody>): Promise<void> {
   // API endpoint to overwrite global commands
-  const endpoint = `applications/${appId}/commands`;
+  const endpoint: string = `applications/${appId}/commands`;
 
   try {
     // This is calling the bulk overwrite endpoint: https://discord.com/developers/docs/interactions/application-commands#bulk-overwrite-global-application-commands
-    await DiscordRequest(endpoint, { method: 'PUT', body: commands });
+    await DiscordRequest(endpoint, { method: DiscordRequestMethod.PUT, body: commands });
   } catch (err) {
     console.error(err);
   }
+  return;
 }
 
 // Simple method that returns a random emoji from list
-export async function getHcpssStatus() {
+export async function getHcpssStatus(): Promise<data_storage> {
   // const html = await fetch("https://status.hcpss.org")
-  const html = await fetch("https://discord.10f7c7.dev/test")
+  const html: Response = await fetch("https://discord.10f7c7.dev/test")
 
-  const $ = cheerio.load(await html.text());
-  const section = $("#status-block div").html();
-  const data = cheerio.load(section);
+  const $: cheerio.CheerioAPI = cheerio.load(await html.text());
+  const section: string = $("#status-block div").html();
+  const data: cheerio.CheerioAPI = cheerio.load(section);
   let block: string = "";
-  const body = data("body").children()
+  const body = data("body").children();
 
 
   for (let j = 0; j < body.length; j++) {
@@ -85,7 +100,7 @@ export async function getHcpssStatus() {
     console.log(body[j].tagName)
 
   }
-  const colorWord = $("#status-block div").css()['border-left'].split(" ")[2]
+  const colorWord: string = $("#status-block div").css()['border-left'].split(" ")[2]
 
   let color: number;
 
@@ -114,12 +129,13 @@ export async function getHcpssStatus() {
   return dataReturn;
 }
 
-export async function initPrevData() {
+export async function initPrevData(): Promise<void> {
   const prevDataId: number = await db.PrevData.max('id');
   if (!prevDataId) return;
   const gather = await db.PrevData.findByPk(prevDataId);
   prevData.date = gather.date;
   prevData.status = gather.status;
+  return;
 }
 
 
@@ -129,7 +145,7 @@ interface Pings {
 }
 
 
-export async function checkStatus() {
+export async function checkStatus(): Promise<void> {
 
   const data: data_storage = await getHcpssStatus();
   if (prevData.date == data.date && prevData.status == data.status) return;
@@ -158,9 +174,8 @@ export async function checkStatus() {
   for (let i = 0; i < channels.length; i++) {
     console.log("channel", channels[i].channelId)
     DiscordRequest(`/channels/${channels[i].channelId}/messages`, {
-      method: 'POST',
+      method: DiscordRequestMethod.POST,
       body: {
-        tts: true,
         content: pings[channels[i].guildId],
         allowed_mentions: {
           parse: ["roles"]

@@ -19,10 +19,9 @@ async function postInteractions(req: Request, res: Response): Promise<void> {
 
   if (type === InteractionType.APPLICATION_COMMAND) {
     const { name } = data;
+    console.log(data);
 
     if (name === 'getstatus') {
-      const channels = await db.Channel.findAll()
-      // console.log(channels[0].channelId);
       // Send a message into the channel where command was triggered from
       const data: data_storage = await getHcpssStatus()
       res.send({
@@ -41,9 +40,8 @@ async function postInteractions(req: Request, res: Response): Promise<void> {
     }
 
     if (name === "register_channel") {
-      // console.log(req.body);
 
-      const [channel, created] = await db.Channel.findOrCreate({
+      const [, created] = await db.Channel.findOrCreate({
         where: {
           channelId: req.body.channel.id
         },
@@ -51,7 +49,6 @@ async function postInteractions(req: Request, res: Response): Promise<void> {
           guildId: req.body.guild?.id
         }
       })
-      // channels.push(req.body.channel.id)
 
       if (!created) {
         res.send({
@@ -74,7 +71,7 @@ async function postInteractions(req: Request, res: Response): Promise<void> {
 
     if (name === "register_role_ping") {
       console.log(req.body.data.options[0].value);
-      const [role, created] = await db.Role.findOrCreate({
+      const [, created] = await db.Role.findOrCreate({
         where: {
           roleId: req.body.data.options[0].value
         },
@@ -99,26 +96,16 @@ async function postInteractions(req: Request, res: Response): Promise<void> {
         }
       })
       return;
-      res.send({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: {
-          content: `<@&${req.body.data.options[0].value}>`,
-          allowed_mentions: {
-            parse: ["roles"]
-          }
-        }
-      })
-
-
-      return;
     }
 
     console.error(`unknown command: ${name}`);
-    res.status(400).json({ error: 'unknown command' });
+    res.status(400).json({ error: 'unknown command' })
+    return;
   }
 
   console.error('unknown interaction type', type);
   res.status(400).json({ error: 'unknown interaction type' });
+  return;
 }
 
 

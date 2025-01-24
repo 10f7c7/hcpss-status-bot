@@ -18,6 +18,7 @@ export function initModels(sequelize: Sequelize) {
 
   return {
     Channel,
-    Role
+    Role,
+    PrevData
   }
 }

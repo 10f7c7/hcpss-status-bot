@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import express from 'express';
+import express, { type Express } from 'express';
 import {
   verifyKeyMiddleware
 } from 'discord-interactions';
@@ -11,9 +11,9 @@ import { initModels } from "./models/index"
 
 
 // Create an express app
-const app = express();
+const app: Express = express();
 // Get port, or default to 3000
-const PORT = process.env.PORT || 3000;
+const PORT: number = Number(process.env.PORT) || 3000;
 
 initModels(db);
 initPrevData();
