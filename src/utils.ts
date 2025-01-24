@@ -21,7 +21,7 @@ export async function DiscordRequest(endpoint, options) {
     headers: {
       Authorization: `Bot ${process.env.DISCORD_TOKEN}`,
       'Content-Type': 'application/json; charset=UTF-8',
-      'User-Agent': 'DiscordBot (https://github.com/discord/discord-example-app, 1.0.0)',
+      'User-Agent': 'HCPSSStatusBot(https://github.com/10f7c7/hcpss-status-bot, 1.0.0)',
     },
     ...options
   });
