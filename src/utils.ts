@@ -64,8 +64,8 @@ export async function InstallGlobalCommands(appId: string | number, commands: Ar
 
 // Simple method that returns a random emoji from list
 export async function getHcpssStatus(): Promise<data_storage> {
-  // const html = await fetch("https://status.hcpss.org")
-  const html: Response = await fetch("https://discord.10f7c7.dev/test")
+  const html: Response = await fetch("https://status.hcpss.org")
+  // const html: Response = await fetch("https://discord.10f7c7.dev/test")
 
   const $: cheerio.CheerioAPI = cheerio.load(await html.text());
   const section: string = $("#status-block div").html();

@@ -19,7 +19,7 @@ initModels(db);
 initPrevData();
 
 setInterval(checkStatus, 10000);
-app.use(logger("dev"));
+// app.use(logger("dev"));
 // app.set("trust proxy", true);
 /**
  * Interactions endpoint URL where Discord will send HTTP requests
