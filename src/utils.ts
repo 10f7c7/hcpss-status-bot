@@ -49,8 +49,8 @@ export async function InstallGlobalCommands(appId, commands) {
 
 // Simple method that returns a random emoji from list
 export async function getHcpssStatus() {
-  const html = await fetch("https://status.hcpss.org")
-  // const html = await fetch("https://discord.10f7c7.dev/test")
+  // const html = await fetch("https://status.hcpss.org")
+  const html = await fetch("https://discord.10f7c7.dev/test")
 
   const $ = cheerio.load(await html.text());
   const section = $("#status-block div").html();
@@ -114,25 +114,57 @@ export async function getHcpssStatus() {
   return dataReturn;
 }
 
+export async function initPrevData() {
+  const prevDataId: number = await db.PrevData.max('id');
+  if (!prevDataId) return;
+  const gather = await db.PrevData.findByPk(prevDataId);
+  prevData.date = gather.date;
+  prevData.status = gather.status;
+}
+
+
+
+interface Pings {
+  [index: string]: string
+}
+
+
 export async function checkStatus() {
 
   const data: data_storage = await getHcpssStatus();
-
   if (prevData.date == data.date && prevData.status == data.status) return;
-  if (prevData.date != data.date && data.status.includes("Normal")) return;
+  if (prevData.date != data.date && data.status.includes("Normal")) {
+    prevData.date = data.date;
+    prevData.status = data.status;
+    await db.PrevData.create({ date: data.date, status: data.status });
+    return
+  };
   const channels = await db.Channel.findAll()
+  const roles = await db.Role.findAll();
+  const pings: Pings = {};
+
+  for (let k = 0; k < roles.length; k++) {
+    if (!pings[roles[k].guildId]) {
+      pings[roles[k].guildId] = `<@&${roles[k].roleId}>`
+    } else {
+      pings[roles[k].guildId] += `<@&${roles[k].roleId}>`
+    }
+  }
 
 
   if (!channels.length) return;
 
 
-  console.log("channels", channels)
   for (let i = 0; i < channels.length; i++) {
     console.log("channel", channels[i].channelId)
     DiscordRequest(`/channels/${channels[i].channelId}/messages`, {
       method: 'POST',
       body: {
         tts: true,
+        content: pings[channels[i].guildId],
+        allowed_mentions: {
+          parse: ["roles"]
+        },
         embeds: [{
           title: data.status,
           description: data.block.replace("Staff\n", "**Staff**"),
@@ -146,13 +178,12 @@ export async function checkStatus() {
 
   prevData.date = data.date;
   prevData.status = data.status;
-
-
+  await db.PrevData.create({ date: data.date, status: data.status });
+  return;
 }
 
 
 
 
 
-// export const channels: Array<string> = [];
 export const prevData: data_storage = { date: '', status: '' }; 

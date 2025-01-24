@@ -18,7 +18,23 @@ const REGISTER_CHANNEL_COMMAND = {
   contexts: [0, 1, 2]
 }
 
+const REGISTER_ROLE_PING_COMMAND = {
+  name: "register_role_ping",
+  description: "registers a role to be pinged upon status change",
+  type: 1,
+  integration_types: [0],
+  contexts: [0],
+  options: [
+    {
+      name: "role",
+      type: 8,
+      description: "role that you want to get pinged",
+      required: true
+    }
+  ]
+}
 
-const ALL_COMMANDS = [GET_STATUS_COMMAND, REGISTER_CHANNEL_COMMAND];
+
+const ALL_COMMANDS = [GET_STATUS_COMMAND, REGISTER_CHANNEL_COMMAND, REGISTER_ROLE_PING_COMMAND];
 
 InstallGlobalCommands(process.env.APP_ID, ALL_COMMANDS);

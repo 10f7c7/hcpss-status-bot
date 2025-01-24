@@ -3,7 +3,7 @@ import express from 'express';
 import {
   verifyKeyMiddleware
 } from 'discord-interactions';
-import { checkStatus } from './utils';
+import { checkStatus, initPrevData } from './utils';
 import logger from "morgan"
 import controller from "./controller"
 import db from "./db"
@@ -16,6 +16,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 initModels(db);
+initPrevData();
+
 setInterval(checkStatus, 10000);
 app.use(logger("dev"));
 // app.set("trust proxy", true);
